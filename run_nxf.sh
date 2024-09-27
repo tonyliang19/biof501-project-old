@@ -12,6 +12,8 @@ RESUME=FALSE # Initially run without resume
 # Add unique timestamp to the log file
 timestamp=$(date +"%Y%m%d_%H%M%S")
 LOG_FILE=${timestamp}-DGE_pipeline.log
+# Input options for the pipeline
+SAMPLESHEET=data/samplesheet.csv
 OUTDIR=results # Output directory for publishing files
 
 # Add a parser from cli arg i.e.
@@ -36,7 +38,7 @@ do
 done
 
 # Then parse the run cmd
-NEXTFLOW_CMD="nextflow run ${NXF_SRC_MAIN} --outdir ${OUTDIR}"
+NEXTFLOW_CMD="nextflow run ${NXF_SRC_MAIN} --outdir ${OUTDIR} --samplesheet ${SAMPLESHEET}"
 
 if [ "$RESUME" == "TRUE" ]; then
   NEXTFLOW_CMD+=" -resume"

@@ -3,9 +3,6 @@
     gene expression analysis
 */
 
-// TODO: This should go to cli arg, and have default option in config
-params.samplesheet = "data/samplesheet.csv"
-
 workflow {
     println "Hello World"
     /*
