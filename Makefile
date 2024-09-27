@@ -25,5 +25,5 @@ help:
 .PHONY: clean
 clean:
 	@echo "Removing intermediate files like logs and work/ ..."
-	@rm -r work/
+	@rm -rf work/
 	@rm -f .nextflow.log*
