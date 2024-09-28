@@ -3,29 +3,11 @@
     gene expression analysis
 */
 
-process DOWNLOAD_GSE_STUDY {
-    debug "${params.verbose_debug}"
-    tag "${accession_code}"
-    // Also publish the output file for now
-    publishDir (
-		path: "${params.outdir}/${task.process.tokenize(':').join('/').toLowerCase()}",
-		mode: 'copy',
-	)
+// Including modules
+include { FASTQC }                  from "./modules/local/fastqc"
+include { softwareVersionsToYAML }  from "./modules/nf-core/main.nf"
 
-    input:
-    tuple val(accession_code), val(dummy)
 
-    output:
-    path("GSE${accession_code}.tar")
-
-    script:
-    // This is dummy approach now to try to download from GEO
-    def gse_name="GSE${accession_code}"
-    def link="https://www.ncbi.nlm.nih.gov/geo/download/?acc=${gse_name}&format=file"
-    """
-    wget -O ${gse_name}.tar ${link} 
-    """
-}
 
 workflow {
     println "Hello World"
@@ -39,14 +21,29 @@ workflow {
         12345678,some_other_value,...
     */
 
+    // Initialize version file to store
+    ch_versions = Channel.empty()
+    
     Channel
         .fromPath( params.samplesheet )
         .splitCsv( header: true )
         .set { record }
 
-    // Process to download the GSE<accession_code> study
-    DOWNLOAD_GSE_STUDY ( record )
-    
 
+    record.view()
+    // Process to download the GSE<accession_code> study
+    FASTQC ( record )    
+
+    // Collect versions from fastqc
+    ch_versions.mix ( FASTQC.out.versions )
+
+    // Lastly collect all software versions and to YAML
+    softwareVersionsToYAML(ch_versions)
+        .collectFile(
+            storeDir: "${params.outdir}/pipeline_info", 
+            name: 'dge_analysis_versions.yml', 
+            sort: true, 
+            newLine: true
+            )
 
 }
